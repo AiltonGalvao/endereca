@@ -1,4 +1,7 @@
 import express from "express";
+import users from "./usersRoutes.js";
+import addresses from "./addressesRoutes.js";
+import auth from "./authRoutes.js";
 
 const routes = (app) => {
   app.route("/").get((req, res) => {
@@ -6,7 +9,10 @@ const routes = (app) => {
   });
 
   app.use(
-    express.json()
+    express.json(),
+    users,
+    addresses,
+    auth
   );
 };
 
