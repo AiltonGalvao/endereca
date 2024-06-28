@@ -5,7 +5,7 @@ import "dotenv/config";
 
 async function seedUsers() {
 
-  await mongoose.connect("mongodb://127.0.0.1:27040/endereca");
+  await mongoose.connect(process.env.DB_CONNECTION_STRING);
 
   const user = {
     name: "Hellmut Schuster",

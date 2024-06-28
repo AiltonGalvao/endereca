@@ -1,17 +1,16 @@
 import NotFound from "../errors/NotFound.js";
 import { addresses } from "../models/index.js";
+import checkForNearbyWaypoints from "../utils/checkForNearbyWaypoints.js";
 
 class AddressController {
 
   static listAddresses = async (req, res, next) => {
     try {
-      const addressesResult = await addresses.find()
-        .populate("createdBy")
-        .exec();
+      const addressesResult = addresses.find();
 
-      // req.result = addressesResult;
+      req.result = addressesResult;
 
-      res.status(200).send(addressesResult);
+      next();
     } catch (error) {
       next(error);
     }
@@ -21,11 +20,15 @@ class AddressController {
     try {
       const id = req.params.id;
 
-      const addressResult = await addresses.findById(id)
+      let addressResult = await addresses.findById(id)
+        .lean() // Isso aqui converte o objeto do Mongoose (imutável) para um do javascript (mutável).
         .populate("createdBy")
         .exec();
 
       if (addressResult !== null) {
+
+        addressResult.nearbyWaypoints = await checkForNearbyWaypoints(addressResult, 10);
+
         res.status(200).send(addressResult);
       } else {
         next(new NotFound("Id do Endereço não localizado"));

@@ -1,14 +1,13 @@
 import mongoose from "mongoose";
-import checkIfValidGeoCoords from "../../../utils/checkIfValidGeoCoords.js";
+import checkIfValidGeoCoords from "../utils/checkIfValidGeoCoords.js";
 
-const addressSchema = new mongoose.Schema(
+let addressSchema = new mongoose.Schema(
   {
     id: {
       type: String
     },
     name: {
       type: String,
-      required: true
     },
     locationType : { // Tipo
       type: String,
@@ -26,7 +25,7 @@ const addressSchema = new mongoose.Schema(
     },
     createdAt: { // Data do Cadastro, pensando se seria melhor usar unix timestamps...
       type: Date,
-      required: true
+      default: Date.now,
     },
     // nearbyPoints: { // Pontos de Interesse Próximos // Isso vai ser calculado na hora
     //   type: [String],
@@ -69,6 +68,17 @@ const addressSchema = new mongoose.Schema(
     versionKey: false
   }
 );
+
+addressSchema.pre("save", function(next){
+  const now = new Date();
+  this.updated_at = now;
+  if(!this.created_at) {
+    this.created_at = now;
+  }
+  next();
+});
+
+addressSchema.index({ location: "2dsphere" });
 
 const addresses = mongoose.model("addresses", addressSchema);
 

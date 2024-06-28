@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import checkIfOrganizationEmail from "../../../utils/checkIfOrganizationEmail.js";
+import checkIfOrganizationEmail from "../utils/checkIfOrganizationEmail.js";
 
 const userSchema = new mongoose.Schema(
   {
