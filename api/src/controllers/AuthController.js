@@ -1,11 +1,11 @@
 import bcrypt from "bcrypt";
-import { expressjwt } from "express-jwt";
+import jwt from "jsonwebtoken";
 import { users } from "../models/index.js";
 
 class AuthController {
 
   static register = async (req, res, next) => {
-    const { name, username, email, password } = req.body;
+    const { name, username, email, password} = req.body;
   
     if (!name || !username || !email || !password) {
       return res.status(400).json({ message: "Todos os campos obrigatórios devem ser preenchidos" });
@@ -50,11 +50,12 @@ class AuthController {
       if (!validPassword) {
         return res.status(400).json({ message: "Email ou senha incorretos." });
       }
-  
-      const token = expressjwt.sign({ id: user._id, email: user.email }, process.env.SECRET_KEY);
-  
+
+      const token = jwt.sign({ id: user._id, email: user.email }, process.env.SECRET_KEY, { expiresIn: "1000h" });
+
       res.status(200).json({ message: "Login bem-sucedido!", token });
     } catch (error) {
+      console.log(error);
       next(error);
     }
 

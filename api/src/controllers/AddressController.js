@@ -1,16 +1,18 @@
 import NotFound from "../errors/NotFound.js";
-import { addresses } from "../models/index.js";
+import { addresses, users } from "../models/index.js";
 import checkForNearbyWaypoints from "../utils/checkForNearbyWaypoints.js";
 
 class AddressController {
 
   static listAddresses = async (req, res, next) => {
     try {
-      const addressesResult = addresses.find();
+      const addressesResult = await addresses.find().populate("createdBy");
 
       req.result = addressesResult;
 
-      next();
+      // next(); // A paginação quebra muito fácil, então tive que tirar por enquanto
+
+      res.status(200).json(addressesResult);
     } catch (error) {
       next(error);
     }
@@ -82,6 +84,106 @@ class AddressController {
     }
   };
 
+  static searchAddresses = async (req, res, next) => {
+    try {
+      const { searchString } = req.query;
+
+      if (searchString) {
+        const searchResult = await searchInAllFields(searchString);
+
+        // req.result = searchResult;
+
+        res.status(200).json(searchResult);
+      } else {
+        const addressesResult = await addresses.find().populate("createdBy");
+
+        // req.result = addressesResult;
+        // next();
+
+        res.status(200).json(addressesResult);
+      }
+    } catch (error) {
+      next(error);
+    }
+  };
+
+
+  static searchFilteredAddresses = async (req, res, next) => {
+    try {
+      const search = await processSearch(req.query);
+
+      if(search !== null) {
+        const addressesResult = await addresses
+          .find(search)
+          .populate("createdBy");
+
+        // req.result = addressesResult;
+        // next();
+
+        res.status(200).json(addressesResult);
+      }
+    }
+    catch (error) {
+      next(error);
+    }
+
+  };
+
+}
+
+async function searchInAllFields(searchString) {
+  const regex = new RegExp(searchString, "i"); // 'i' para case insensitive
+
+  const searchQuery = [
+    { name: regex },
+    { locationType: regex },
+    // { createdAt: regex },
+    { project: regex },
+    { observations: regex },
+    { plusCode: regex },
+  ];
+
+  const checkForUserId = await users.findOne({ name: regex });
+
+  if(checkForUserId) {
+    searchQuery.push({createdBy: checkForUserId._id});
+  }
+
+  const searchResult = await addresses.find().or(searchQuery).populate("createdBy");
+
+  return searchResult;
+}
+
+
+async function processSearch(parameters) {
+  const { name, locationType, createdAt, createdBy, project, observations} = parameters;
+  let { plusCode } = parameters;
+  let search = {};
+
+  if(name) search.name = name;
+  if(locationType) search.locationType = locationType;
+  if(createdAt) search.createdAt = createdAt;
+  if(project) search.project = project;
+  if(observations) search.observations = observations;
+
+  if(plusCode) {
+    search.plusCode = plusCode;
+    plusCode = plusCode.replace(/ /g, "+");
+  }
+
+  if(createdBy) {
+    const regex = new RegExp(createdBy, "i");
+    const user = await users.findOne({name: regex});
+      
+    if(user !== null) {
+      search.createdBy = user._id;
+    } else {
+      search = null;
+    }
+    
+  }
+
+  return search;
 }
 
 export default AddressController;

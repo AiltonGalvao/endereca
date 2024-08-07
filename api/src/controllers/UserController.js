@@ -22,6 +22,7 @@ class UserController {
       const userResult = await users.findById(id);
 
       if (userResult !== null) {
+        userResult.password = undefined;
         res.status(200).send(userResult);
       } else {
         next(new NotFound("Id do Usuário não localizado"));

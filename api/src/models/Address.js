@@ -27,9 +27,6 @@ let addressSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
-    // nearbyPoints: { // Pontos de Interesse Próximos // Isso vai ser calculado na hora
-    //   type: [String],
-    // },
     createdBy: { // Cadastrador
       type: mongoose.Schema.Types.ObjectId,
       ref: "users",

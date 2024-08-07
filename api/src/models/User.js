@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "A senha é obrigatória"]
+    },
+    profilePicture: {
+      type: String,
     }
   },
   {
