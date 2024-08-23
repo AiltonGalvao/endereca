@@ -1,5 +1,6 @@
 import IncorrectRequisition from "../errors/IncorrectRequisiton.js";
 
+// Isso aqui quebra muito fácil, acho que não fiz direito...
 async function paginate(req, res, next) {
   try {
     let { limit = 5, page = 1, sorting = "_id:-1" } = req.query;

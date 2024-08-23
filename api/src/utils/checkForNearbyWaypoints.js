@@ -2,6 +2,7 @@ import { addresses } from "../models/index.js";
 
 const KILOMETER = 1000;
 
+// Essa função procura por outros endereços próximos
 async function checkForNearbyWaypoints(address, maxDistanceInMeters) {
   // if(address.locationType === "Estabelecimento de Ensino") return [];
 

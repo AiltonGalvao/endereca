@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { addresses } from "../models/index.js";
 import "dotenv/config";
 
+// Cria dados iniciais para popular o banco de dados um pouco
 async function seedAddresses() {
 
   await mongoose.connect(process.env.DB_CONNECTION_STRING);

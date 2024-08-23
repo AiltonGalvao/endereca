@@ -2,6 +2,8 @@ import NotFound from "../errors/NotFound.js";
 import { addresses, users } from "../models/index.js";
 import checkForNearbyWaypoints from "../utils/checkForNearbyWaypoints.js";
 
+// O populate serve para substituir o ID no campo "createdBy pelo objeto com as informações de quem cadastrou"
+
 class AddressController {
 
   static listAddresses = async (req, res, next) => {
@@ -23,12 +25,13 @@ class AddressController {
       const id = req.params.id;
 
       let addressResult = await addresses.findById(id)
-        .lean() // Isso aqui converte o objeto do Mongoose (imutável) para um do javascript (mutável).
+        .lean() // Isso aqui converte o objeto do Mongoose (imutável) para um do javascript (mutável)
         .populate("createdBy")
         .exec();
 
       if (addressResult !== null) {
 
+        // Aqui ele adiciona um campo com até 5 endereços próximos, com um raio de 10 quilômetros
         addressResult.nearbyWaypoints = await checkForNearbyWaypoints(addressResult, 10);
 
         res.status(200).send(addressResult);
@@ -94,7 +97,7 @@ class AddressController {
         // req.result = searchResult;
 
         res.status(200).json(searchResult);
-      } else {
+      } else { // Ou seja, se a string de pesquisa for vazia, simplesmente retorna todos os endereços
         const addressesResult = await addresses.find().populate("createdBy");
 
         // req.result = addressesResult;
@@ -143,9 +146,10 @@ async function searchInAllFields(searchString) {
     { plusCode: regex },
   ];
 
-  const checkForUserId = await users.findOne({ name: regex });
+  // Aqui ele procura no banco o ID de quem cadastrou, baseado no nome dado
+  const checkForUserId = await users.findOne({ name: regex }); 
 
-  if(checkForUserId) {
+  if(checkForUserId) { // Aqui ele modifica a query de pesquisa para colocar o nome de quem cadastrou
     searchQuery.push({createdBy: checkForUserId._id});
   }
 
@@ -166,12 +170,12 @@ async function processSearch(parameters) {
   if(project) search.project = project;
   if(observations) search.observations = observations;
 
-  if(plusCode) {
+  if(plusCode) { // Isso aqui serve para que o sinal de + não quebre a URL
     search.plusCode = plusCode;
     plusCode = plusCode.replace(/ /g, "+");
   }
 
-  if(createdBy) {
+  if(createdBy) { // Aqui ele procura no banco o ID de quem cadastrou, baseado no nome dado
     const regex = new RegExp(createdBy, "i");
     const user = await users.findOne({name: regex});
       
