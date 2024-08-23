@@ -39,7 +39,7 @@ let addressSchema = new mongoose.Schema(
     observations: {
       type: String
     },
-    plusCode: { // Plus Code associado ao Endereço, pensando se precisa guardar isso, pois isso pode ser calculado a partir das coordenadas
+    plusCode: { // Plus Code associado ao Endereço. É calculado a partir das coordenadas
       type: String,
       required: true
     },
